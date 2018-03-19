@@ -1,0 +1,16 @@
+Changes
+lib/Dancer2/Plugin/DomainModel.pm
+LICENSE
+Makefile.PL
+MANIFEST
+t/00-load.t
+t/01-default.t
+t/02-invalid.t
+t/03-bad-args.t
+t/04-logger.t
+t/05-simple.t
+t/lib/Models.pm
+t/lib/Models/News.pm
+t/lib/Test/Schema.pm
+t/lib/Test/Schema/Result/News.pm
+t/views/index.tt

@@ -1,0 +1,4 @@
+
+[% FOREACH n IN news %]
+  <span>[% n.entry %]</span>
+[% END %]

@@ -1,0 +1,86 @@
+# NAME
+
+Dancer2::Plugin::DomainModel - Combat the anemic domain model
+
+# SYNOPSIS
+
+```perl
+# in config.yml
+
+plugins:
+  DomainModel:
+    base_class: ModelBase # your base class or factory
+    args:                 # optional args passed to base_class constructor
+      dsn: dbname
+      user: uname
+
+# in your app
+
+use Dancer2::Plugin::DomainModel;
+get '/' => sub {
+  template 'index', { news => model('News')->latest };
+};
+```
+
+# DESCRIPTION
+
+In the original definition of _MVC_, the _model_ manages the behavior and 
+data of the application domain. However, in most modern _MVC_ frameworks, 
+a _model_ typically is just thought of a _thing_ coupled with some form of 
+ORM and thus each _model_ represents a single table in a database. Typically 
+this will lead to including your application and business logic inside of your 
+controllers, causing 'fat controllers' and an 
+[anemic domain model](https://en.wikipedia.org/wiki/Anemic_domain_model).
+
+Having yet another layer between your _DAO_ (data access object) and 
+application framework allows you to decouple your business logic into easily 
+testable modules that will no longer be restricted to the limitations of your 
+_DAO_ or framework implementations. Effectively, your model goes from **ISA** 
+_DAO_ to **HASA** _DAO_
+
+# USAGE
+
+## model
+
+```
+model('<model_name>')->method_name
+```
+
+The `model` keyword is provided for interfacing with your models.
+
+On initialization, [Dancer2::Plugin::DomainModel](https://metacpan.org/pod/Dancer2::Plugin::DomainModel) creates an instance of 
+`base_class` via `base_class->new(app => $self)` where `app` will 
+be the [Dancer2](https://metacpan.org/pod/Dancer2) instance itself that was passed to the plugin. This will 
+allow easy access to interfacing with the current [Dancer2](https://metacpan.org/pod/Dancer2) instance (such as 
+calling the built in logging methods or other accessible API functions. See 
+[Modifying-the-app-at-building-time](https://metacpan.org/pod/Dancer2::Plugin#Modifying-the-app-at-building-time)). 
+Calling `model('model_name')` will proxy to 
+`base_class->get('model_name')`. Thus your `base_class` is responsible 
+for dispatching the correct model object. A simple example is provided in the 
+test files `t/lib/Models.pm`.
+
+# See also
+
+[Domain Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design)
+
+# AUTHORS
+
+Samuel Smith <esaym@cpan.org>
+
+# BUGS
+
+See [http://rt.cpan.org](http://rt.cpan.org) to report and view bugs.
+
+# SOURCE
+
+The source code repository for Dancer2::Plugin::DomainModel can be found at 
+[https://github.com/smith153/Dancer2-Plugin-DomainModel](https://github.com/smith153/Dancer2-Plugin-DomainModel).
+
+# COPYRIGHT
+
+Copyright 2018 by Samuel Smith <esaym@cpan.org>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See [http://www.perl.com/perl/misc/Artistic.html](http://www.perl.com/perl/misc/Artistic.html)
