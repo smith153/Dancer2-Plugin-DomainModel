@@ -10,7 +10,7 @@ use Dancer2::Plugin 0.200000;
 use Module::Runtime 'use_module';
 
 # ABSTRACT: Combat the anemic domain model
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 $VERSION = eval $VERSION;
 
 has _base_class => (

@@ -1,5 +1,8 @@
 Revision history for Dancer2-Plugin-DomainModel
 
+0.02    2018-04-01
+            - Add ability to use a built in model class
+
 0.01    2018-03-19
             - First
 
