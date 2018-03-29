@@ -5,7 +5,7 @@ use warnings;
 
 use Carp;
 
-use Dancer2::Core::Types qw(Str Object HashRef);
+use Dancer2::Core::Types qw/Str Object HashRef ArrayRef/;
 use Dancer2::Plugin 0.200000;
 use Module::Runtime 'use_module';
 
@@ -26,6 +26,12 @@ has _model => (
 has _args => (
     is  => 'rwp',
     isa => HashRef,
+);
+
+has _allowed_conf => (
+    is      => 'ro',
+    isa     => ArrayRef,
+    default => sub { [qw/base_class args model_dir/] }
 );
 
 plugin_keywords qw/model/;
@@ -63,10 +69,17 @@ sub _is_valid_config
     }
 
     my %is_allowed_setting =
-      map { $_ => 1 } qw( base_class args );
+      map { $_ => 1 } @{ $plugin->_allowed_conf };
 
     if ( my @extra = grep { !$is_allowed_setting{$_} } keys %$conf ) {
         croak __PACKAGE__ . ": invalid configuration key(s): --(@extra)-- ";
+    }
+
+    if ( exists $conf->{base_class} && exists $conf->{model_dir} ) {
+
+        croak __PACKAGE__
+          . ": Invalid configuration - keys base_class and "
+          . "model_dir are mutually exclusive!";
     }
 
 }
