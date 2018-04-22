@@ -3,11 +3,11 @@ use strict;
 use warnings;
 
 use Carp;
-use Moo;
 use Module::Pluggable::Object;
 use Module::Runtime 'use_module';
 use Types::Standard
   qw( ArrayRef Bool Dict InstanceOf Int Optional Str HashRef Object);
+use Moo;
 use namespace::autoclean;
 
 my $base = __PACKAGE__;
@@ -79,7 +79,7 @@ sub get
 {
     my ( $self, $model ) = @_;
     if ( not exists $self->_models->{$model} ) {
-        croak __PACKAGE__ . ": Model '$model' not found!";
+        croak "Model '$model' not found!";
     }
     return $self->_models->{$model};
 }

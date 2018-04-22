@@ -2,15 +2,22 @@ use strict;
 use warnings;
 
 #
-# Test how our custom model dies with bad config
+# Test how our custom model dies with no models
 #
 
-use Test::More;
+BEGIN {
+    use Test::More;
+    eval "use Moose";
+    plan skip_all => "Moose required for testing using default model" if $@;
+}
+
 plan tests => 2;
 
 my $app = q|
     package TestApp;
     use Dancer2;
+    use FindBin;
+    use lib "$FindBin::Bin/lib";
 
     BEGIN {
         setting views => path( 't', 'views' );
@@ -18,8 +25,7 @@ my $app = q|
            
         set plugins => {
             DomainModel => {
-                base_class => 'Models',
-                namespace  => 'Models',
+                namespace  => 'Test::NoModel',
             },
         };
     }
@@ -33,5 +39,5 @@ my $app = q|
 eval $app;
 
 my $ret = $@;
-ok( $ret, 'App should fail with conflicting config' );
-like( $ret, qr/mutually exclusive/, "Error shows conflicting conf keys" );
+ok( $ret, 'App should should fail if no models found' );
+like( $ret, qr/No models found under/, "Error says 'No models found under..'" );

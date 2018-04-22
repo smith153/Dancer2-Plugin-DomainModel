@@ -9,6 +9,9 @@ WriteMakefile(
         'ExtUtils::MakeMaker' => 0
     },
     'TEST_REQUIRES' => {
+        'FindBin'                   => 0,
+        'File::Temp'                => 0,
+        'Capture::Tiny'             => 0,
         'Dancer2'                   => 0,
         'Test::More'                => 0,
         'Plack::Test'               => 0,
@@ -17,13 +20,14 @@ WriteMakefile(
         'Moo'                       => 0,
         'Module::Pluggable::Object' => 0,
         'Types::Standard'           => 0,
-        'namespace::autoclean'      => 0,
         'DBIx::Class'               => 0,
     },
     'PREREQ_PM' => {
-        'Dancer2::Plugin' => "0.200000",
-        'Module::Runtime' => 0,
-        'Carp'            => 0,
+        'Module::Pluggable::Object' => 0,
+        'Dancer2::Plugin'           => '0.200000',
+        'Module::Runtime'           => 0,
+        'Carp'                      => 0,
+        'namespace::autoclean'      => '0.16',
     },
     'LICENSE'    => 'perl_5',
     'META_MERGE' => {
