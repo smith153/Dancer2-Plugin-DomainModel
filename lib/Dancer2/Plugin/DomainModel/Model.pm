@@ -44,8 +44,11 @@ sub BUILD
         $schema_class = $args->{DBIC}{schema_class};
         require_module($schema_class);
 
-        $config->{model_args}{schema} =
-          $schema_class->connect( $args->{DBIC}{dsn} );
+        $config->{model_args}{schema} = $schema_class->connect(
+            $args->{DBIC}{dsn},
+            $args->{DBIC}{user},
+            $args->{DBIC}{password}
+        );
         push(
             @{ $config->{add_roles} },
             'Dancer2::Plugin::DomainModel::RoleDBIC'
@@ -57,6 +60,14 @@ sub BUILD
         push(
             @{ $config->{add_roles} },
             'Dancer2::Plugin::DomainModel::RoleLogger'
+        );
+    }
+
+    if ( not( exists $args->{with_model} && $args->{with_model} == 0 ) ) {
+        $config->{model_args}{_model} = $self;
+        push(
+            @{ $config->{add_roles} },
+            'Dancer2::Plugin::DomainModel::RoleModel'
         );
     }
 
