@@ -10,7 +10,7 @@ use Module::Runtime 'use_module';
 use Dancer2::Plugin 0.200000;
 
 # ABSTRACT: Combat the anemic domain model
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 $VERSION = eval $VERSION;
 
 has _base_class => (
@@ -33,9 +33,9 @@ has _allowed_conf => (
     isa     => ArrayRef,
     default => sub {
         [
-            'base_class', 'args',      'namespace', 'DBIC',
-            'does_roles', 'add_roles', 'only_with', 'make_immutable',
-            'with_logger'
+            'base_class',  'args',      'namespace', 'DBIC',
+            'does_roles',  'add_roles', 'only_with', 'make_immutable',
+            'with_logger', 'with_model'
         ];
     }
 );
@@ -299,6 +299,17 @@ By default, for every model class under C<namespace>,
 L<Dancer2::Plugin::DomainModel> will call 
 C<< ClassName->meta->make_immutable >> before initialization. If you don't 
 want this, set C<make_immutable> to false.
+
+=head3 with_model
+
+    with_model: 1
+
+By default, for every model class under C<namespace>, 
+L<Dancer2::Plugin::DomainModel> will apply the 
+L<Dancer2::Plugin::DomainModel::RoleModel> role to every model that is loaded. 
+This will allow you do to C<< $self->model('<model-name>')->my_method_name >> 
+from your model classes. Roughly the same as the exported C<model> keyword.
+
 
 =head1 CAVEATS
 

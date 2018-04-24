@@ -4,32 +4,29 @@ Dancer2::Plugin::DomainModel - Combat the anemic domain model
 
 # SYNOPSIS
 
-```perl
-# in config.yml
+    # in config.yml
 
-plugins:
-  DomainModel:
-    base_class: ModelBase # your base class or factory
-    args:                 # optional args passed to base_class constructor
-      dsn: dbname
-      user: uname
+    plugins:
+      DomainModel:
+        namespace: MyApp::MyModels    # the parent namespace of your model classes
 
-# in your app
+    # in your app
 
-use Dancer2::Plugin::DomainModel;
-get '/' => sub {
-  template 'index', { news => model('News')->latest };
-};
-```
+    use Dancer2;
+    use Dancer2::Plugin::DomainModel;
+
+    get '/' => sub {
+      template 'index', { news => model('News')->latest };
+    };
 
 # DESCRIPTION
 
 In the original definition of _MVC_, the _model_ manages the behavior and 
 data of the application domain. However, in most modern _MVC_ frameworks, 
-a _model_ typically is just thought of a _thing_ coupled with some form of 
-ORM and thus each _model_ represents a single table in a database. Typically 
-this will lead to including your application and business logic inside of your 
-controllers, causing 'fat controllers' and an 
+a _model_ is typically treated as a _thing_ coupled with some form of 
+ORM and thus each _model_ represents a single table in a database. In most 
+cases, this will lead to including your application and business logic inside 
+of your controllers, causing 'fat controllers' and an 
 [anemic domain model](https://en.wikipedia.org/wiki/Anemic_domain_model).
 
 Having yet another layer between your _DAO_ (data access object) and 
@@ -38,13 +35,17 @@ testable modules that will no longer be restricted to the limitations of your
 _DAO_ or framework implementations. Effectively, your model goes from **ISA** 
 _DAO_ to **HASA** _DAO_
 
-# USAGE
+# USAGE (via base\_class)
+
+    DomainModel:
+      base_class: ModelBase # your base class or factory
+      args:                 # optional args passed to base_class constructor
+        dsn: dbname
+        user: uname
 
 ## model
 
-```
-model('<model_name>')->method_name
-```
+    model('<model_name>')->method_name
 
 The `model` keyword is provided for interfacing with your models.
 
@@ -58,6 +59,159 @@ Calling `model('model_name')` will proxy to
 `base_class->get('model_name')`. Thus your `base_class` is responsible 
 for dispatching the correct model object. A simple example is provided in the 
 test files `t/lib/Models.pm`.
+
+# USAGE (via namespace)
+
+    DomainModel:
+      namespace: MyApp::MyModels        # the parent namespace of your model classes
+      DBIC:                             # use the optional DBIC plugin
+        dsn: dbi:SQLite:dbname=test.db  # required
+        schema_class: MyApp::Schema     # required
+      does_roles:                       # ensures each model consumes these roles
+        - MyApp::BigRole
+        - MyApp::BiggerRole
+
+Configuration via the `base_class` parameter is nice if you want full control 
+over initialization of your own models. However, a default model driver 
+(AKA model 'factory') is provided and can be enabled by specifying the 
+`namespace` configuration parameter.
+
+## model
+
+    model('<model_name>')->method_name
+
+The `model` keyword functions the same whether 
+[Dancer2::Plugin::DomainModel](https://metacpan.org/pod/Dancer2::Plugin::DomainModel) is configured using `base_class` or 
+`namespace`.
+
+## Namespace configuration parameters
+
+### namespace
+
+Obviously, [Dancer2::Plugin::DomainModel](https://metacpan.org/pod/Dancer2::Plugin::DomainModel) needs to know where to look for 
+your model classes. `namespace` should be a parent namespace/directory under 
+which your model classes are located.
+
+### DBIC
+
+If set, this will apply the [Dancer2::Plugin::DomainModel::RoleDBIC](https://metacpan.org/pod/Dancer2::Plugin::DomainModel::RoleDBIC) role 
+to all your models. As such, the needed `dsn` and `schema_class` need to be 
+specified.
+
+This will add the following callable [DBIx::Class](https://metacpan.org/pod/DBIx::Class) methods to your models:
+
+- schema
+
+    The [DBIx::Class::Schema](https://metacpan.org/pod/DBIx::Class::Schema) schema object.
+
+- resultset
+
+    The [DBIx::Class::ResultSet](https://metacpan.org/pod/DBIx::Class::ResultSet) resultset object
+
+- rset
+
+    Same as `resultset`
+
+### does\_roles
+
+On larger projects, you might want to ensure that every model that is loaded 
+consumes a certain role or implements a certain interface. `does_roles` takes 
+a list of these roles that you may provide.
+
+### only\_with
+
+    only_with:
+      - Awesome::Role
+      - Awesomer::Role
+
+On even larger projects, you might have classes under your `namespace` 
+directory that are not even models (yuck!). In that case, you may choose to 
+only load classes that consume a certain role which would denote it as a model 
+class and not something else.
+
+### with\_logger
+
+    with_logger: 1
+
+By default, for every model class under `namespace`, 
+[Dancer2::Plugin::DomainModel](https://metacpan.org/pod/Dancer2::Plugin::DomainModel) will apply the 
+[Dancer2::Plugin::DomainModel::RoleLogger](https://metacpan.org/pod/Dancer2::Plugin::DomainModel::RoleLogger) role to every model that is loaded. 
+This will give you the following methods callable from your model object:
+
+- logger
+
+    The raw Dancer2 logger engine object
+
+- info
+
+    Print a log message of level 'info'
+
+- warn
+
+    Print a log message of level 'warn'
+
+- debug
+
+    Print a log message of level 'debug'
+
+If you do not want this role applied, set `with_logger` to a false value.
+
+### make\_immutable
+
+    make_immutable: 1
+
+By default, for every model class under `namespace`, 
+[Dancer2::Plugin::DomainModel](https://metacpan.org/pod/Dancer2::Plugin::DomainModel) will call 
+`ClassName->meta->make_immutable` before initialization. If you don't 
+want this, set `make_immutable` to false.
+
+### with\_model
+
+    with_model: 1
+
+By default, for every model class under `namespace`, 
+[Dancer2::Plugin::DomainModel](https://metacpan.org/pod/Dancer2::Plugin::DomainModel) will apply the 
+[Dancer2::Plugin::DomainModel::RoleModel](https://metacpan.org/pod/Dancer2::Plugin::DomainModel::RoleModel) role to every model that is loaded. 
+This will allow you do to `$self->model('<model-name>')->my_method_name` 
+from your model classes. Roughly the same as the exported `model` keyword.
+
+# CAVEATS
+
+A few gotchas
+
+## Configuration conflicts
+
+`namespace` and `base_class` are mutually exclusive and will fail on app load.
+
+## Moose
+
+[Moose](https://metacpan.org/pod/Moose) is required in order to load the default model driver provided via 
+the `namespace` parameter. Your model classes should use [Moose](https://metacpan.org/pod/Moose) (Or at 
+least allow applying roles via `ClassName->meta` semantics).
+
+## Immutable Models
+
+Depending on your use case, most models (if they make use of [Moose](https://metacpan.org/pod/Moose) at least) 
+will need to not be set as immutable as model classes might have roles applied 
+to them on initialization. Nonetheless, `meta->immutable` is called on 
+each loaded class (unless `make_immutable` is set to 0).
+
+# Examples
+
+See the files under the `t` directory.
+
+- `t/lib/Models.pm`
+
+    An example custom model 'driver' class for use with `base_class`
+
+- `t/lib/Models/News.pm`
+
+    An example model for use with a custom model driver.
+
+- `t/lib/Test/MyModels/Weather.pm`
+
+    An example of what a model might look like when used with the built in model 
+    driver class (enabled via the `namespace` configuration).
 
 # See also
 
@@ -79,6 +233,8 @@ The source code repository for Dancer2::Plugin::DomainModel can be found at
 # COPYRIGHT
 
 Copyright 2018 by Samuel Smith <esaym@cpan.org>.
+
+# LICENSE
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

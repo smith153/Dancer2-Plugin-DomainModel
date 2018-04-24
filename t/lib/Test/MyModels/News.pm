@@ -16,20 +16,25 @@ sub latest
 sub hi_from_info
 {
     my ($self) = @_;
-    $self->info('Hi from info logger' );
+    $self->info('Hi from info logger');
 }
 
 sub hi_from_debug
 {
     my ($self) = @_;
-    $self->debug('Hi from debug logger' );
+    $self->debug('Hi from debug logger');
 }
 
 sub hi_from_warn
 {
     my ($self) = @_;
-    $self->warn('Hi from warn logger' );
+    $self->warn('Hi from warn logger');
 }
 
+sub no_db_latest
+{
+    my ($self) = @_;
+    $self->model('Weather')->no_db_latest;
+}
 
 1;

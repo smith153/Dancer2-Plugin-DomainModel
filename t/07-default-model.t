@@ -14,7 +14,7 @@ BEGIN {
 use Plack::Test;
 use HTTP::Request::Common;
 
-plan tests => 6;
+plan tests => 8;
 
 use_ok 'Dancer2::Plugin::DomainModel';
 
@@ -60,8 +60,13 @@ use_ok 'Dancer2::Plugin::DomainModel';
     get '/' => sub {
         template 'index', { news => model('Weather')->latest };
     };
+
     get '/rset' => sub {
         template 'index', { news => model('Weather')->rset_latest };
+    };
+
+    get '/no_db_latest' => sub {
+        template 'index', { news => model('News')->no_db_latest };
     };
 
 }
@@ -75,8 +80,15 @@ $req = GET 'http://127.0.0.1/';
 $res = $test->request($req);
 is( $res->code, 200, '[GET / ] Request successful' );
 like( $res->content, qr/<span>first<\/span>/, '[GET / ] Correct content' );
+
 $req = GET 'http://127.0.0.1/rset';
 $res = $test->request($req);
 is( $res->code, 200, '[GET /rset ] Request successful' );
-like( $res->content, qr/<span>first<\/span>/, '[GET / ] Correct content' );
+like( $res->content, qr/<span>first<\/span>/, '[GET /rset ] Correct content' );
+
+$req = GET 'http://127.0.0.1/no_db_latest';
+$res = $test->request($req);
+is( $res->code, 200, '[GET /no_db_latest ] Request successful' );
+like( $res->content, qr/<span>one<\/span>/,
+    '[GET /no_db_latest ] Correct content' );
 
